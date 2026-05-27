@@ -179,6 +179,14 @@ class _WritePostScreenState extends State<WritePostScreen> {
                             maxMembers: finalMaxMembers, // 수정된 부분 적용!
                             currentMembers: 1,
                             duration: durationText,
+                            meetingSchedule: (_startTime != null && _endTime != null)
+                                ? "${formatTime(_startTime!)}~${formatTime(_endTime!)}"
+                                : null,
+                            startDate: _startDate,
+                            endDate: _endDate,
+                            grade: _selectedGrade,
+                            projectType: _selectedType == 0 ? "전공" : "교양",
+                            roles: _roles,
                           );
 
                           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: const Row(children: [Icon(Icons.check_circle, color: Colors.white), SizedBox(width: 10), Text("작성이 완료되었습니다!", style: TextStyle(fontWeight: FontWeight.bold))]), backgroundColor: Colors.teal.shade400, behavior: SnackBarBehavior.floating, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)), duration: const Duration(seconds: 2)));
