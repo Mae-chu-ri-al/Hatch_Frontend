@@ -26,7 +26,7 @@ class ApiService {
   // 게시글 목록 불러오기 (연동 준비 상태)
   Future<List<StudyModel>> fetchStudies(String category) async {
     try {
-      final response = await _dio.get('/studies/search', queryParameters: {'project_type': category});
+      final response = await _dio.get('/teamProject/search', queryParameters: {'category': category});
       return (response.data as List).map((json) => StudyModel.fromJson(json)).toList();
 
       /*
@@ -45,7 +45,7 @@ class ApiService {
   // 게시글 작성하기 (연동 준비 상태)
   Future<bool> createStudy(StudyModel study) async {
     try {
-      final response = await _dio.post('/studies/post', data: study.toJson());
+      final response = await _dio.post('/teamProject/post', data: study.toJson());
       return response.statusCode == 200;
 
       /*
