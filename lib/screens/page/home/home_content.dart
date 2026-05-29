@@ -94,6 +94,7 @@ class _HomeContentState extends State<HomeContent> {
                     return Padding(
                       padding: const EdgeInsets.only(right: 20),
                       child: HorizontalStudyCard(
+                        id: item['id']?.toString(),
                         title: item['title'].toString(),
                         category: item['category'].toString(),
                         desc: item['desc'].toString(), // 💡 찜 리스트 저장을 위해 파라미터 추가!
@@ -102,6 +103,9 @@ class _HomeContentState extends State<HomeContent> {
                         duration: item['duration'].toString(),
                         imageColor: Colors.blueAccent.shade100,
                         icon: Icons.design_services,
+                        roles: item['roles'] != null ? List<Map<String, dynamic>>.from(item['roles'] as List) : null,
+                        grade: item['grade'] as int?,
+                        projectType: item['projectType']?.toString(),
                         onApply: widget.onApply,
                       ),
                     );

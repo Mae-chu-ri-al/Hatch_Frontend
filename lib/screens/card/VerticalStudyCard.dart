@@ -3,12 +3,16 @@ import 'package:cap/screens/write_post/write_page/ApplyTeamDialog.dart';
 import 'package:cap/screens/page/home/home_page.dart';
 
 class VerticalStudyCard extends StatefulWidget {
+  final String? id;
   final String title;
   final String category;
   final String desc;
   final String status;
   final String members;
   final String duration;
+  final List<Map<String, dynamic>>? roles;
+  final int? grade;
+  final String? projectType;
   final Function(String, String)? onApply;
 
   static List<Map<String, dynamic>> likedPosts = [];
@@ -17,12 +21,16 @@ class VerticalStudyCard extends StatefulWidget {
 
   const VerticalStudyCard({
     Key? key,
+    this.id,
     required this.title,
     required this.category,
     required this.desc,
     required this.status,
     required this.members,
     required this.duration,
+    this.roles,
+    this.grade,
+    this.projectType,
     this.onApply,
   }) : super(key: key);
 
@@ -32,12 +40,14 @@ class VerticalStudyCard extends StatefulWidget {
 
 class _VerticalStudyCardState extends State<VerticalStudyCard> {
   void _toggleLike() {
-    bool currentlyLiked = VerticalStudyCard.likedPosts.any((post) => post['title'] == widget.title);
+    bool currentlyLiked = VerticalStudyCard.likedPosts.any((post) => (widget.id != null && post['id'] == widget.id) || (widget.id == null && post['title'] == widget.title));
 
     if (!currentlyLiked) {
       VerticalStudyCard.likedPosts.add({
+        'id': widget.id,
         'title': widget.title, 'category': widget.category, 'desc': widget.desc,
         'status': widget.status, 'members': widget.members, 'duration': widget.duration,
+        'roles': widget.roles, 'grade': widget.grade, 'projectType': widget.projectType,
       });
 
       AppGlobal.activityLog.insert(0, {
@@ -47,7 +57,7 @@ class _VerticalStudyCardState extends State<VerticalStudyCard> {
       });
       AppGlobal.hasNewNotification.value = true;
     } else {
-      VerticalStudyCard.likedPosts.removeWhere((post) => post['title'] == widget.title);
+      VerticalStudyCard.likedPosts.removeWhere((post) => (widget.id != null && post['id'] == widget.id) || (widget.id == null && post['title'] == widget.title));
     }
 
     // 💡 찜을 누를 때마다 전역에 업데이트 신호를 보냄
@@ -75,7 +85,7 @@ class _VerticalStudyCardState extends State<VerticalStudyCard> {
               ValueListenableBuilder<int>(
                   valueListenable: VerticalStudyCard.likeUpdateNotifier,
                   builder: (context, value, child) {
-                    bool isLiked = VerticalStudyCard.likedPosts.any((post) => post['title'] == widget.title);
+                    bool isLiked = VerticalStudyCard.likedPosts.any((post) => (widget.id != null && post['id'] == widget.id) || (widget.id == null && post['title'] == widget.title));
                     return GestureDetector(
                       onTap: _toggleLike,
                       child: Icon(isLiked ? Icons.favorite : Icons.favorite_border, color: isLiked ? Colors.pinkAccent.shade200 : Colors.grey.shade400, size: 24),
@@ -99,7 +109,21 @@ class _VerticalStudyCardState extends State<VerticalStudyCard> {
               Icon(Icons.calendar_today_outlined, size: 16, color: Colors.grey.shade500), const SizedBox(width: 5), Text(widget.duration, style: TextStyle(color: Colors.grey.shade500, fontSize: 13)),
               const Spacer(),
               GestureDetector(
-                  onTap: isClosed ? null : () => showDialog(context: context, builder: (context) => ApplyTeamDialog(onApplyDone: widget.onApply, title: widget.title, category: widget.category)),
+                  onTap: isClosed ? null : () => showDialog(
+                    context: context,
+                    builder: (context) => ApplyTeamDialog(
+                      onApplyDone: widget.onApply,
+                      title: widget.title,
+                      category: widget.category,
+                      desc: widget.desc,
+                      status: widget.status,
+                      members: widget.members,
+                      duration: widget.duration,
+                      roles: widget.roles,
+                      grade: widget.grade,
+                      projectType: widget.projectType,
+                    ),
+                  ),
                   child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       decoration: BoxDecoration(color: isClosed ? Colors.grey.shade200 : mintColor.withOpacity(0.3), borderRadius: BorderRadius.circular(20)),

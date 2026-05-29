@@ -81,9 +81,13 @@ class _StudyMatchingScreenState extends State<home_page> {
     }
 
     return {
+      "id": model.id,
       "title": model.title, "category": model.category, "desc": model.desc,
       "status": displayStatus, "members": "${model.currentMembers}/${model.maxMembers}명",
       "duration": model.duration, "isMine": false,
+      "roles": model.roles,
+      "grade": model.grade,
+      "projectType": model.projectType,
     };
   }
 
@@ -96,6 +100,47 @@ class _StudyMatchingScreenState extends State<home_page> {
 
   void _handleApply(String title, String category) {
     setState(() {
+      // 지원할 때 해당 스터디의 현재 인원을 1명 늘립니다.
+      for (int i = 0; i < teamList.length; i++) {
+        if (teamList[i].title == title) {
+          final p = teamList[i];
+          if (p.currentMembers < p.maxMembers) {
+            teamList[i] = StudyModel(
+              id: p.id, title: p.title, category: p.category, desc: p.desc, status: p.status,
+              maxMembers: p.maxMembers, currentMembers: p.currentMembers + 1, duration: p.duration,
+              meetingSchedule: p.meetingSchedule, startDate: p.startDate, endDate: p.endDate,
+              grade: p.grade, projectType: p.projectType, roles: p.roles,
+            );
+          }
+        }
+      }
+      for (int i = 0; i < studyList.length; i++) {
+        if (studyList[i].title == title) {
+          final p = studyList[i];
+          if (p.currentMembers < p.maxMembers) {
+            studyList[i] = StudyModel(
+              id: p.id, title: p.title, category: p.category, desc: p.desc, status: p.status,
+              maxMembers: p.maxMembers, currentMembers: p.currentMembers + 1, duration: p.duration,
+              meetingSchedule: p.meetingSchedule, startDate: p.startDate, endDate: p.endDate,
+              grade: p.grade, projectType: p.projectType, roles: p.roles,
+            );
+          }
+        }
+      }
+      for (int i = 0; i < contestList.length; i++) {
+        if (contestList[i].title == title) {
+          final p = contestList[i];
+          if (p.currentMembers < p.maxMembers) {
+            contestList[i] = StudyModel(
+              id: p.id, title: p.title, category: p.category, desc: p.desc, status: p.status,
+              maxMembers: p.maxMembers, currentMembers: p.currentMembers + 1, duration: p.duration,
+              meetingSchedule: p.meetingSchedule, startDate: p.startDate, endDate: p.endDate,
+              grade: p.grade, projectType: p.projectType, roles: p.roles,
+            );
+          }
+        }
+      }
+
       var project = allData.firstWhere((item) => item.title == title);
       if (!_appliedProjects.contains(project)) {
         _appliedProjects.add(project);
@@ -154,6 +199,14 @@ class _StudyMatchingScreenState extends State<home_page> {
     setState(() {
       _isSearchActive = true;
       _isNotificationOpen = false;
+      _selectedSearchFilters.clear();
+      if (_selectedIndex == 1) {
+        _selectedSearchFilters.add("팀플");
+      } else if (_selectedIndex == 2) {
+        _selectedSearchFilters.add("스터디");
+      } else if (_selectedIndex == 3) {
+        _selectedSearchFilters.add("공모전");
+      }
     });
     Future.delayed(const Duration(milliseconds: 300), () {
       if (mounted && _isSearchActive) { setState(() => _isCardsVisible = true); _searchFocusNode.requestFocus(); }
@@ -166,7 +219,11 @@ class _StudyMatchingScreenState extends State<home_page> {
       if (mounted) {
         setState(() { _isSearchActive = false; _isSearchFilterOpen = false; });
         Future.delayed(const Duration(milliseconds: 400), () {
-          if (mounted) { _searchController.clear(); _searchQuery = ""; }
+          if (mounted) {
+            _searchController.clear();
+            _searchQuery = "";
+            _selectedSearchFilters.clear();
+          }
         });
       }
     });
@@ -193,11 +250,25 @@ class _StudyMatchingScreenState extends State<home_page> {
               padding: const EdgeInsets.symmetric(horizontal: 10.0),
               child: Row(
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: GestureDetector(
-                      onTap: () => Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const home_page()), (route) => false),
-                      child: const CircleAvatar(radius: 14, backgroundColor: Colors.transparent, backgroundImage: AssetImage("assets/Logo_MeChuri.png")),
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 400),
+                    curve: Curves.easeOutQuart,
+                    width: _isSearchActive ? 0.0 : 44.0,
+                    decoration: const BoxDecoration(color: Colors.transparent),
+                    clipBehavior: Clip.hardEdge,
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      physics: const NeverScrollableScrollPhysics(),
+                      child: SizedBox(
+                        width: 44,
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: GestureDetector(
+                            onTap: () => Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const home_page()), (route) => false),
+                            child: const CircleAvatar(radius: 14, backgroundColor: Colors.transparent, backgroundImage: AssetImage("assets/Logo_MeChuri.png")),
+                          ),
+                        ),
+                      ),
                     ),
                   ),
 
@@ -243,7 +314,7 @@ class _StudyMatchingScreenState extends State<home_page> {
                               ),
                               if (_isSearchActive)
                                 Positioned(
-                                    left: 85,
+                                    left: 100,
                                     right: 40,
                                     top: 8, bottom: 0,
                                     child: AnimatedOpacity(
@@ -353,7 +424,19 @@ class _StudyMatchingScreenState extends State<home_page> {
                                               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10), physics: const BouncingScrollPhysics(), itemCount: filteredSearchData.length,
                                               itemBuilder: (context, index) {
                                                 final item = filteredSearchData[index];
-                                                return VerticalStudyCard(title: item.title, category: item.category, desc: item.desc, status: item.status, members: "${item.currentMembers}/${item.maxMembers}명", duration: item.duration, onApply: _handleApply);
+                                                return VerticalStudyCard(
+                                                  id: item.id,
+                                                  title: item.title,
+                                                  category: item.category,
+                                                  desc: item.desc,
+                                                  status: item.status,
+                                                  members: "${item.currentMembers}/${item.maxMembers}명",
+                                                  duration: item.duration,
+                                                  roles: item.roles,
+                                                  grade: item.grade,
+                                                  projectType: item.projectType,
+                                                  onApply: _handleApply,
+                                                );
                                               },
                                             ),
                                           )
@@ -450,7 +533,15 @@ class _StudyMatchingScreenState extends State<home_page> {
           onPressed: () async {
             String? presetCategory;
             if (_selectedIndex == 1) presetCategory = "팀플"; if (_selectedIndex == 2) presetCategory = "스터디"; if (_selectedIndex == 3) presetCategory = "공모전";
-            final newPostMap = await Navigator.push(context, MaterialPageRoute(builder: (context) => WritePostScreen(initialCategory: presetCategory)));
+            final newPostMap = await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => WritePostScreen(
+                  initialCategory: presetCategory,
+                  existingTitles: allData.map((item) => item.title).toList(),
+                ),
+              ),
+            );
 
             if (newPostMap != null) {
               setState(() {

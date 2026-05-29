@@ -4,8 +4,9 @@ import 'package:cap/models/study_model.dart';
 
 class WritePostScreen extends StatefulWidget {
   final String? initialCategory;
+  final List<String>? existingTitles;
 
-  const WritePostScreen({Key? key, this.initialCategory}) : super(key: key);
+  const WritePostScreen({Key? key, this.initialCategory, this.existingTitles}) : super(key: key);
 
   @override
   State<WritePostScreen> createState() => _WritePostScreenState();
@@ -151,6 +152,43 @@ class _WritePostScreenState extends State<WritePostScreen> {
                       width: double.infinity, height: 55,
                       child: ElevatedButton(
                         onPressed: () {
+                          final title = _titleController.text.trim();
+                          if (title.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: const Row(
+                                  children: [
+                                    Icon(Icons.error_outline, color: Colors.white),
+                                    SizedBox(width: 10),
+                                    Text("제목을 입력하세요.", style: TextStyle(fontWeight: FontWeight.bold)),
+                                  ],
+                                ),
+                                backgroundColor: Colors.redAccent,
+                                behavior: SnackBarBehavior.floating,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              ),
+                            );
+                            return;
+                          }
+
+                          if (widget.existingTitles != null && widget.existingTitles!.contains(title)) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: const Row(
+                                  children: [
+                                    Icon(Icons.warning_amber_outlined, color: Colors.white),
+                                    SizedBox(width: 10),
+                                    Text("이미 존재하는 스터디 이름입니다.", style: TextStyle(fontWeight: FontWeight.bold)),
+                                  ],
+                                ),
+                                backgroundColor: Colors.amber.shade700,
+                                behavior: SnackBarBehavior.floating,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              ),
+                            );
+                            return;
+                          }
+
                           int totalMembers = 0;
                           for (var role in _roles) totalMembers += (role['count'] as int);
 
@@ -172,7 +210,8 @@ class _WritePostScreenState extends State<WritePostScreen> {
                           }
 
                           StudyModel newPostData = StudyModel(
-                            title: _titleController.text.isEmpty ? "무제 스터디" : _titleController.text,
+                            id: DateTime.now().millisecondsSinceEpoch.toString(), // Generate a unique local ID!
+                            title: title.isEmpty ? "무제 스터디" : title,
                             category: _selectedCategory ?? "스터디",
                             desc: _descController.text.isEmpty ? "내용이 없습니다." : _descController.text,
                             status: "모집중",

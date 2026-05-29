@@ -4,6 +4,7 @@ import 'package:cap/screens/card/VerticalStudyCard.dart';
 import 'package:cap/screens/page/home/home_page.dart';
 
 class HorizontalStudyCard extends StatelessWidget {
+  final String? id;
   final String title;
   final String category;
   final String status;
@@ -12,10 +13,14 @@ class HorizontalStudyCard extends StatelessWidget {
   final String desc; // 💡 찜 리스트 저장을 위해 내용 추가
   final Color imageColor;
   final IconData icon;
+  final List<Map<String, dynamic>>? roles;
+  final int? grade;
+  final String? projectType;
   final Function(String, String)? onApply;
 
   const HorizontalStudyCard({
     Key? key,
+    this.id,
     required this.title,
     required this.category,
     required this.status,
@@ -24,16 +29,21 @@ class HorizontalStudyCard extends StatelessWidget {
     required this.desc, // 💡 추가됨
     required this.imageColor,
     required this.icon,
+    this.roles,
+    this.grade,
+    this.projectType,
     this.onApply,
   }) : super(key: key);
 
   void _toggleLike() {
-    bool currentlyLiked = VerticalStudyCard.likedPosts.any((post) => post['title'] == title);
+    bool currentlyLiked = VerticalStudyCard.likedPosts.any((post) => (id != null && post['id'] == id) || (id == null && post['title'] == title));
 
     if (!currentlyLiked) {
       VerticalStudyCard.likedPosts.add({
+        'id': id,
         'title': title, 'category': category, 'desc': desc,
         'status': status, 'members': members, 'duration': duration,
+        'roles': roles, 'grade': grade, 'projectType': projectType,
       });
 
       AppGlobal.activityLog.insert(0, {
@@ -43,7 +53,7 @@ class HorizontalStudyCard extends StatelessWidget {
       });
       AppGlobal.hasNewNotification.value = true;
     } else {
-      VerticalStudyCard.likedPosts.removeWhere((post) => post['title'] == title);
+      VerticalStudyCard.likedPosts.removeWhere((post) => (id != null && post['id'] == id) || (id == null && post['title'] == title));
     }
 
     // 💡 전역 찜 상태 업데이트 알림!
@@ -96,7 +106,7 @@ class HorizontalStudyCard extends StatelessWidget {
                   child: ValueListenableBuilder<int>(
                       valueListenable: VerticalStudyCard.likeUpdateNotifier,
                       builder: (context, value, child) {
-                        bool isLiked = VerticalStudyCard.likedPosts.any((post) => post['title'] == title);
+                        bool isLiked = VerticalStudyCard.likedPosts.any((post) => (id != null && post['id'] == id) || (id == null && post['title'] == title));
                         return GestureDetector(
                             onTap: _toggleLike,
                             child: Container(
@@ -135,7 +145,18 @@ class HorizontalStudyCard extends StatelessWidget {
                         onPressed: isClosed ? null : () {
                           showDialog(
                               context: context,
-                              builder: (context) => ApplyTeamDialog(onApplyDone: onApply, title: title, category: category)
+                              builder: (context) => ApplyTeamDialog(
+                                onApplyDone: onApply,
+                                title: title,
+                                category: category,
+                                desc: desc,
+                                status: status,
+                                members: members,
+                                duration: duration,
+                                roles: roles,
+                                grade: grade,
+                                projectType: projectType,
+                              )
                           );
                         },
                         style: ElevatedButton.styleFrom(backgroundColor: isClosed ? Colors.grey.shade300 : mintColor, elevation: 0, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20))),

@@ -43,12 +43,16 @@ class LikedPostsScreen extends StatelessWidget {
               itemBuilder: (context, index) {
                 final item = myLikes[index];
                 return VerticalStudyCard(
+                  id: item['id']?.toString(),
                   title: item['title'].toString(),
                   category: item['category'].toString(),
                   desc: item['desc'].toString(),
                   status: item['status'].toString(),
                   members: item['members'].toString(),
                   duration: item['duration'].toString(),
+                  roles: item['roles'] != null ? List<Map<String, dynamic>>.from(item['roles'] as List) : null,
+                  grade: item['grade'] as int?,
+                  projectType: item['projectType']?.toString(),
                 );
               },
             );

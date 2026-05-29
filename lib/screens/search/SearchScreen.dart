@@ -119,6 +119,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   itemBuilder: (context, index) {
                     final item = filteredData[index];
                     return VerticalStudyCard(
+                      id: item['id']?.toString(),
                       title: item['title']!,
                       category: item['category']!,
                       desc: item['desc']!,
@@ -167,7 +168,14 @@ class _SearchScreenState extends State<SearchScreen> {
       floatingActionButton: Container(
         margin: const EdgeInsets.only(bottom: 10, right: 5),
         child: FloatingActionButton(
-          onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const WritePostScreen())),
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => WritePostScreen(
+                existingTitles: widget.allData.map((item) => item['title'].toString()).toList(),
+              ),
+            ),
+          ),
           backgroundColor: mintColor, shape: const CircleBorder(), elevation: 5,
           child: const Icon(Icons.add, size: 35, color: Colors.white),
         ),
